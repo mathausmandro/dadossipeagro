@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.sipeagro.atualizar</string>
+  <key>ProgramArguments</key><array><string>/bin/zsh</string><string>/Users/mathausmandro/Documents/SIPEAGRO Consulta/tools/atualizar.sh</string></array>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>0</integer></dict>
+  <key>StandardOutPath</key><string>/Users/mathausmandro/Documents/SIPEAGRO Consulta/dados/atualizacao.log</string>
+  <key>StandardErrorPath</key><string>/Users/mathausmandro/Documents/SIPEAGRO Consulta/dados/atualizacao.log</string>
+</dict></plist>
