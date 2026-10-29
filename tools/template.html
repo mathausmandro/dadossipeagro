@@ -4,10 +4,10 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: sticky search bar, filter column (drawer on phone) + result list of establishment cards */
+/* Layout: sticky header with tabs + search, filter column (drawer on phone) + card list */
 :root{
   --bg:#f3f4ee; --surface:#ffffff; --ink:#1d2419; --muted:#5d6656; --line:#d9ddd0;
-  --accent:#2f6b3a; --accent-ink:#ffffff; --accent-soft:#e2eddf; --soil:#8a5a2b;
+  --accent:#2f6b3a; --accent-ink:#ffffff; --accent-soft:#e2eddf; --soil:#8a5a2b; --soil-soft:#f3e8dc;
   --ok:#2f7d3e; --ok-bg:#e1f0e3; --bad:#a3342b; --bad-bg:#f6e2df; --warn:#9a6b00; --warn-bg:#f7edd2;
   --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -15,39 +15,50 @@
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#141812; --surface:#1d231a; --ink:#e7ebe1; --muted:#9ea893; --line:#323b2d;
-  --accent:#7cc289; --accent-ink:#10200f; --accent-soft:#25371f; --soil:#d4a26d;
+  --accent:#7cc289; --accent-ink:#10200f; --accent-soft:#25371f; --soil:#d4a26d; --soil-soft:#33281c;
   --ok:#86d293; --ok-bg:#1f3523; --bad:#f09085; --bad-bg:#3d1f1b; --warn:#e8c062; --warn-bg:#3a3017; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141812; --surface:#1d231a; --ink:#e7ebe1; --muted:#9ea893; --line:#323b2d;
-  --accent:#7cc289; --accent-ink:#10200f; --accent-soft:#25371f; --soil:#d4a26d;
+  --accent:#7cc289; --accent-ink:#10200f; --accent-soft:#25371f; --soil:#d4a26d; --soil-soft:#33281c;
   --ok:#86d293; --ok-bg:#1f3523; --bad:#f09085; --bad-bg:#3d1f1b; --warn:#e8c062; --warn-bg:#3a3017; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;margin:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
-header.top .wrap{padding-block:12px;display:flex;flex-direction:column;gap:10px}
+header.top .wrap{padding-block:12px 0;display:flex;flex-direction:column;gap:10px}
 .brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-h1{font-family:var(--f-display);font-weight:700;font-size:1.65rem;letter-spacing:.01em;margin:0;line-height:1;text-wrap:balance}
+h1{font-family:var(--f-display);font-weight:700;font-size:1.65rem;letter-spacing:.01em;margin:0;line-height:1}
 h1 span{color:var(--accent)}
 .src{font-size:.8rem;color:var(--muted)}
+.tabs{display:flex;gap:4px}
+.tab{border:none;background:none;color:var(--muted);font-family:var(--f-display);font-weight:700;font-size:1.1rem;letter-spacing:.03em;padding:6px 14px 8px;border-bottom:3px solid transparent;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.tab small{font-family:var(--f-body);font-weight:600;font-size:.75rem;color:var(--muted);margin-left:4px}
 .searchrow{display:flex;gap:8px}
 #q{flex:1;min-width:0;font:inherit;font-size:1rem;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 #q:focus{outline:none;border-color:var(--accent)}
 button{font:inherit;cursor:pointer}
 #btnFilt{display:none;border:1.5px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:10px;padding:0 14px;font-weight:600}
-.layout{display:grid;grid-template-columns:280px 1fr;gap:24px;padding-block:20px 48px}
-aside{align-self:start;position:sticky;top:calc(env(safe-area-inset-top,0px) + 120px);max-height:calc(100vh - 140px);overflow:auto;display:flex;flex-direction:column;gap:18px;padding-right:4px}
+.layout{display:grid;grid-template-columns:290px 1fr;gap:24px;padding-block:24px 48px}
+aside{align-self:start;position:sticky;top:calc(env(safe-area-inset-top,0px) + 150px);max-height:calc(100vh - 170px);overflow:auto;display:flex;flex-direction:column;gap:18px;padding-right:4px}
+.fset{display:flex;flex-direction:column;gap:18px}
 .fg h3{font-family:var(--f-display);font-weight:600;font-size:.95rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
-select{width:100%;font:inherit;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+select,input.num{width:100%;font:inherit;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);min-width:0}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:.86rem;display:inline-flex;gap:6px;align-items:center}
 .chip small{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.78rem}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .chip[aria-pressed="true"] small{color:var(--accent-ink);opacity:.8}
-.chip:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.clear{border:none;background:none;color:var(--accent);font-weight:600;padding:0;text-align:left}
+.chip:focus-visible,select:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gcond{display:grid;grid-template-columns:1fr 60px 60px 24px;gap:6px;align-items:center;margin-bottom:6px}
+.gcond button{border:none;background:none;color:var(--muted);font-size:1rem;padding:0}
+.link{border:none;background:none;color:var(--accent);font-weight:600;padding:0;text-align:left}
+.hint{font-size:.78rem;color:var(--muted);margin:4px 0 0}
 main{min-width:0}
+.active{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.active:empty{display:none}
+.active button{border:none;background:var(--soil-soft);color:var(--soil);font-weight:600;border-radius:6px;padding:4px 9px;font-size:.82rem}
 .summary{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .count{font-family:var(--f-display);font-size:2.2rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
 .count small{font-family:var(--f-body);font-size:.9rem;font-weight:400;color:var(--muted);margin-left:6px}
@@ -57,23 +68,30 @@ main{min-width:0}
 .bar i b{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px}
 .bar span:last-of-type{font-variant-numeric:tabular-nums;color:var(--muted)}
 .list{display:flex;flex-direction:column;gap:10px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .card .h{display:flex;justify-content:space-between;gap:10px;align-items:start}
-.card h2 a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--muted)}.card h2 a:hover{color:var(--accent);border-color:var(--accent)}
-.ctt{font-size:.8rem;color:var(--accent);font-weight:600;text-decoration:none}
-.pill.N{background:var(--accent);color:var(--accent-ink);margin-right:4px}
 .card h2{font-size:1.02rem;font-weight:700;margin:0;line-height:1.25;overflow-wrap:anywhere}
 .card .nf{color:var(--muted);font-size:.88rem;margin-top:2px;overflow-wrap:anywhere}
+.pills{display:flex;gap:4px;flex-shrink:0}
 .pill{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:6px;padding:3px 7px;white-space:nowrap}
-.pill.A{background:var(--ok-bg);color:var(--ok)}.pill.C{background:var(--bad-bg);color:var(--bad)}.pill.S{background:var(--warn-bg);color:var(--warn)}
+.pill.A,.pill.Registrado{background:var(--ok-bg);color:var(--ok)}.pill.C,.pill.Vencido{background:var(--bad-bg);color:var(--bad)}.pill.S{background:var(--warn-bg);color:var(--warn)}
+.pill.N{background:var(--accent);color:var(--accent-ink)}
 .meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.86rem;color:var(--muted)}
 .meta b{font-family:var(--f-mono);font-weight:500;color:var(--ink);font-size:.82rem}
 .acts{display:flex;flex-wrap:wrap;gap:6px}
 .act{font-size:.8rem;border-radius:6px;padding:3px 8px;background:var(--accent-soft);color:var(--ink)}
 .act em{font-style:normal;font-weight:700;color:var(--soil);margin-right:4px;font-size:.72rem;letter-spacing:.05em}
+.gar{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:2px 14px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.gar div{display:flex;justify-content:space-between;gap:8px;font-size:.84rem;border-bottom:1px dotted var(--line);padding:2px 0;min-width:0}
+.gar div.hit{color:var(--accent);font-weight:700}
+.gar b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.contact{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.86rem;border-top:1px solid var(--line);padding-top:8px}
+.contact a{color:var(--accent);text-decoration:none;font-weight:600;overflow-wrap:anywhere}
+.empresa{font-size:.88rem;color:var(--muted)}
+.empresa button{border:none;background:none;padding:0;color:var(--accent);font-weight:700;text-align:left}
 .more{margin:16px auto 0;display:block;border:1.5px solid var(--accent);background:none;color:var(--accent);font-weight:600;border-radius:10px;padding:10px 22px}
 .empty{padding:40px 16px;text-align:center;color:var(--muted)}
-.note{font-size:.8rem;color:var(--muted);margin-top:24px;max-width:70ch}
+.note{font-size:.8rem;color:var(--muted);margin-top:24px;max-width:72ch}
 .note a{color:var(--accent)}
 .drawerhead{display:none}
 @media (max-width:820px){
@@ -92,32 +110,50 @@ main{min-width:0}
 </style>
 
 <header class="top"><div class="wrap">
-  <div class="brand"><h1>Fertilizantes <span>SIPEAGRO</span></h1><span class="src">Empresas registradas no MAPA · fertilizantes, inoculantes e corretivos</span></div>
+  <div class="brand"><h1>Fertilizantes <span>SIPEAGRO</span></h1><span class="src">Produtos e empresas registrados no MAPA · fertilizantes, inoculantes e corretivos</span></div>
   <div class="searchrow">
-    <input id="q" type="search" placeholder="Buscar empresa, CNPJ, registro ou município" autocomplete="off" aria-label="Buscar">
+    <input id="q" type="search" autocomplete="off" aria-label="Buscar">
     <button id="btnFilt" aria-controls="filters">Filtros <span id="nf"></span></button>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tabP" aria-selected="true">Produtos <small id="tcP"></small></button>
+    <button class="tab" role="tab" id="tabE" aria-selected="false">Empresas <small id="tcE"></small></button>
   </div>
 </div></header>
 
 <div class="wrap layout">
   <aside id="filters" aria-label="Filtros">
-    <div class="drawerhead"><h3>Filtros</h3><button class="clear" id="close">Fechar</button></div>
-    <div class="fg"><h3>Novidades</h3><div class="chips" id="fNovo"></div></div>
-    <div class="fg"><h3>Tipo de produto</h3><div class="chips" id="fTipo"></div></div>
-    <div class="fg"><h3>Atividade</h3><div class="chips" id="fAt"></div></div>
-    <div class="fg"><h3>Situação do registro</h3><div class="chips" id="fSt"></div></div>
-    <div class="fg"><h3>Estado</h3><select id="fUf"><option value="">Todos os estados</option></select></div>
-    <div class="fg"><h3>Município</h3><select id="fMun"><option value="">Todos os municípios</option></select></div>
-    <div class="fg"><h3>Forma de comercialização</h3><div class="chips" id="fCom"></div></div>
-    <button class="clear" id="reset">Limpar todos os filtros</button>
+    <div class="drawerhead"><h3>Filtros</h3><button class="link" id="close">Fechar</button></div>
+    <div class="fset" id="fsP">
+      <div class="fg"><h3>Garantias</h3><div id="gconds"></div><button class="link" id="addG">+ Filtrar por garantia</button><p class="hint">Ex.: N Total mínimo 10 e K2O mínimo 10.</p></div>
+      <div class="fg"><h3>Classificação</h3><div class="chips" id="pCl"></div></div>
+      <div class="fg"><h3>Modo de aplicação</h3><div class="chips" id="pModo"></div></div>
+      <div class="fg"><h3>Natureza física</h3><div class="chips" id="pNat"></div></div>
+      <div class="fg"><h3>Situação do registro</h3><div class="chips" id="pSit"></div></div>
+      <div class="fg"><h3>Novidades</h3><div class="chips" id="pNovo"></div></div>
+      <div class="fg"><h3>Estado da empresa</h3><select id="pUf"><option value="">Todos os estados</option></select></div>
+      <div class="fg"><h3>Tipo de produto</h3><select id="pNome"><option value="">Todos os tipos</option></select></div>
+    </div>
+    <div class="fset" id="fsE" hidden>
+      <div class="fg"><h3>Novidades</h3><div class="chips" id="fNovo"></div></div>
+      <div class="fg"><h3>Tipo de produto</h3><div class="chips" id="fTipo"></div></div>
+      <div class="fg"><h3>Atividade</h3><div class="chips" id="fAt"></div></div>
+      <div class="fg"><h3>Situação do registro</h3><div class="chips" id="fSt"></div></div>
+      <div class="fg"><h3>Estado</h3><select id="fUf"><option value="">Todos os estados</option></select></div>
+      <div class="fg"><h3>Município</h3><select id="fMun"><option value="">Todos os municípios</option></select></div>
+      <div class="fg"><h3>Contato</h3><div class="chips" id="fCt"></div></div>
+      <div class="fg"><h3>Forma de comercialização</h3><div class="chips" id="fCom"></div></div>
+    </div>
+    <button class="link" id="reset">Limpar todos os filtros</button>
     <div class="apply"><button id="apply">Ver resultados</button></div>
   </aside>
   <main>
-    <div class="summary"><div class="count" id="count">0</div></div>
+    <div class="active" id="active"></div>
+    <div class="summary"><div class="count" id="count">…</div></div>
     <div class="bars" id="bars"></div>
-    <div class="list" id="list"></div>
+    <div class="list" id="list"><div class="empty">Carregando produtos…</div></div>
     <button class="more" id="more" hidden>Mostrar mais</button>
-    <p class="note">Fonte: Portal de Dados Abertos do MAPA, conjunto <a href="https://dados.agricultura.gov.br/dataset/sipeagro" target="_blank" rel="noopener">SIPEAGRO – Fertilizantes</a>, versão baixada em <span id="dt"></span>. Empresas que aparecem pela primeira vez numa atualização recebem o selo "Novo" por 60 dias. O CNPJ vem parcialmente mascarado e a base pública não traz telefone nem e-mail; tocar no nome da empresa abre uma busca pelo contato. A lista de produtos registrados (marca comercial e garantias) não é publicada como dado aberto; para isso consulte o próprio SIPEAGRO.</p>
+    <p class="note">Fontes: MAPA – <a href="https://dados.agricultura.gov.br/dataset/sipeagro" target="_blank" rel="noopener">Dados Abertos SIPEAGRO</a> (empresas) e <a href="https://mapa-indicadores.agricultura.gov.br/publico/extensions/Fertilizantes/Fertilizantes.html" target="_blank" rel="noopener">Painel de Fertilizantes</a> (produtos, garantias e contatos). Base de <span id="dt"></span>, atualizada automaticamente todo dia. Itens que aparecem pela primeira vez numa atualização recebem o selo "Novo" por 60 dias. O CNPJ vem parcialmente mascarado na base pública.</p>
   </main>
 </div>
 
@@ -125,113 +161,225 @@ main{min-width:0}
 <script>
 (function(){
 const D=JSON.parse(document.getElementById('data').textContent);
-const TIPOS=["FERTILIZANTE MINERAL","FERTILIZANTE ORGÂNICO","INOCULANTE","BIOFERTILIZANTE","CORRETIVO","CONDICIONADOR DE SOLO","SUBSTRATO PARA PLANTAS","REMINERALIZADOR"];
-const NOVO_DESDE=new Date(new Date(D.hoje)-60*864e5).toISOString().slice(0,10);
+const $=id=>document.getElementById(id);
+const norm=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const cap=s=>{s=(s||'').toLowerCase();return s.charAt(0).toUpperCase()+s.slice(1)};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>n.toLocaleString('pt-BR');
 const ST={A:"Ativo",C:"Cancelado",S:"Suspenso"};
-const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
-const cap=s=>{s=s.toLowerCase();return s.charAt(0).toUpperCase()+s.slice(1)};
-const E=D.e.map(e=>({uf:e[0],mun:e[1],reg:e[2],st:e[3],cnpj:e[4],rz:e[5],nf:e[6],p:e[7],
-  novo:e[8]&&e[8]!=='base'&&e[8]>=NOVO_DESDE,s:norm([e[5],e[6],e[2],e[4],D.mun[e[1]],e[0]].join(' ')),cd:e[4].replace(/\D/g,'')}));
+const NOVO_DESDE=new Date(new Date(D.hoje)-60*864e5).toISOString().slice(0,10);
+const NOVO_NUM=+NOVO_DESDE.replace(/-/g,'');
+
+// ---------- Empresas ----------
+const TIPOS=["FERTILIZANTE MINERAL","FERTILIZANTE ORGÂNICO","INOCULANTE","BIOFERTILIZANTE","CORRETIVO","CONDICIONADOR DE SOLO","SUBSTRATO PARA PLANTAS","REMINERALIZADOR"];
+const E=D.e.map(e=>({uf:e[0],mun:e[1],reg:e[2],st:e[3],cnpj:e[4],rz:e[5],nf:e[6],p:e[7],novo:!!(e[8]&&e[8]!=='base'&&e[8]>=NOVO_DESDE),
+  tel:e[9]||'',mail:e[10]||'',end:e[11]||'',np:0,s:norm([e[5],e[6],e[2],e[4],D.mun[e[1]],e[0],e[10]].join(' ')),cd:e[4].replace(/\D/g,'')}));
+const byReg=new Map(E.map(e=>[e.reg,e]));
 const tipoIdx=new Set(TIPOS.map(t=>D.cl.indexOf(t)).filter(i=>i>=0));
 const comIdx=D.cl.map((c,i)=>i).filter(i=>!tipoIdx.has(i)&&D.cl[i].startsWith('PRODUTO'));
-const S={novo:new Set(),q:'',tipo:new Set(),com:new Set(),at:new Set(),st:new Set(['A']),uf:'',mun:''};
-let shown=50,res=[];
-const $=id=>document.getElementById(id);
+const SE={q:'',novo:new Set(),ct:new Set(),tipo:new Set(),com:new Set(),at:new Set(),st:new Set(['A']),uf:'',mun:''};
 
-// counts for chip labels (whole base)
-const cntCl=new Array(D.cl.length).fill(0),cntAt=new Array(D.at.length).fill(0);
-E.forEach(e=>{const sc=new Set(),sa=new Set();e.p.forEach(([a,c])=>{sa.add(a);sc.add(c)});sc.forEach(c=>cntCl[c]++);sa.forEach(a=>cntAt[a]++)});
+// ---------- Produtos (produtos.json) ----------
+let PD=null,PR=[],gOrder=[];
+const SP={q:'',cl:new Set(),modo:new Set(),nat:new Set(),sit:new Set(),novo:new Set(),uf:'',nome:'',est:'',g:[]};
+let tab='P',shown=40,res=[];
+
 function chips(el,items,set,label){
   el.innerHTML='';items.forEach(([v,n])=>{const b=document.createElement('button');b.className='chip';b.type='button';
-    b.setAttribute('aria-pressed',set.has(v));b.innerHTML=label(v)+(n!=null?' <small>'+n.toLocaleString('pt-BR')+'</small>':'');
+    b.setAttribute('aria-pressed',set.has(v));b.innerHTML=esc(label(v))+(n!=null?' <small>'+fmt(n)+'</small>':'');
     b.onclick=()=>{set.has(v)?set.delete(v):set.add(v);b.setAttribute('aria-pressed',set.has(v));run()};el.appendChild(b)});
 }
 const byCnt=(arr,c)=>arr.map(i=>[i,c[i]]).sort((a,b)=>b[1]-a[1]);
-chips($('fTipo'),byCnt([...tipoIdx],cntCl),S.tipo,i=>cap(D.cl[i]));
-chips($('fCom'),byCnt(comIdx,cntCl),S.com,i=>cap(D.cl[i].replace(/^PRODUTOS? /,'')));
-chips($('fAt'),byCnt(D.at.map((_,i)=>i),cntAt),S.at,i=>cap(D.at[i]));
-const cntSt={};E.forEach(e=>cntSt[e.st]=(cntSt[e.st]||0)+1);
-chips($('fSt'),Object.keys(ST).map(k=>[k,cntSt[k]||0]),S.st,k=>ST[k]);
 
-chips($('fNovo'),[['n',E.filter(e=>e.novo).length]],S.novo,()=>'Novos registros (60 dias)');
-document.getElementById('dt').textContent=D.atualizado;
-const ufs=[...new Set(E.map(e=>e.uf))].filter(Boolean).sort();
-ufs.forEach(u=>$('fUf').add(new Option(u,u)));
+const cntCl=new Array(D.cl.length).fill(0),cntAt=new Array(D.at.length).fill(0);
+E.forEach(e=>{const sc=new Set(),sa=new Set();e.p.forEach(([a,c])=>{sa.add(a);sc.add(c)});sc.forEach(c=>cntCl[c]++);sa.forEach(a=>cntAt[a]++)});
+const cntSt={};E.forEach(e=>cntSt[e.st]=(cntSt[e.st]||0)+1);
+function buildEChips(){
+  chips($('fNovo'),[['n',E.filter(e=>e.novo).length]],SE.novo,()=>'Novas empresas (60 dias)');
+  chips($('fCt'),[['t',E.filter(e=>e.tel).length],['m',E.filter(e=>e.mail).length]],SE.ct,v=>v==='t'?'Com telefone':'Com e-mail');
+  chips($('fTipo'),byCnt([...tipoIdx],cntCl),SE.tipo,i=>cap(D.cl[i]));
+  chips($('fCom'),byCnt(comIdx,cntCl),SE.com,i=>cap(D.cl[i].replace(/^PRODUTOS? /,'')));
+  chips($('fAt'),byCnt(D.at.map((_,i)=>i),cntAt),SE.at,i=>cap(D.at[i]));
+  chips($('fSt'),Object.keys(ST).map(k=>[k,cntSt[k]||0]),SE.st,k=>ST[k]);
+}
+buildEChips();
+[...new Set(E.map(e=>e.uf))].filter(Boolean).sort().forEach(u=>{$('fUf').add(new Option(u,u));$('pUf').add(new Option(u,u))});
 function fillMun(){
   const sel=$('fMun');sel.length=1;
-  const m=[...new Set(E.filter(e=>!S.uf||e.uf===S.uf).map(e=>e.mun))].map(i=>[i,D.mun[i]]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
-  m.forEach(([i,n])=>sel.add(new Option(S.uf?n:n,i)));
+  [...new Set(E.filter(e=>!SE.uf||e.uf===SE.uf).map(e=>e.mun))].map(i=>[i,D.mun[i]]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR')).forEach(([i,n])=>sel.add(new Option(n,i)));
 }
 fillMun();
-$('fUf').onchange=e=>{S.uf=e.target.value;S.mun='';fillMun();run()};
-$('fMun').onchange=e=>{S.mun=e.target.value;run()};
-let t;$('q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{S.q=e.target.value;run()},150)};
+$('fUf').onchange=e=>{SE.uf=e.target.value;SE.mun='';fillMun();run()};
+$('fMun').onchange=e=>{SE.mun=e.target.value;run()};
+$('pUf').onchange=e=>{SP.uf=e.target.value;run()};
+$('pNome').onchange=e=>{SP.nome=e.target.value;run()};
 
-function match(e,clSet){
-  if(S.st.size&&!S.st.has(e.st))return false;
-  if(S.novo.size&&!e.novo)return false;
-  if(S.uf&&e.uf!==S.uf)return false;
-  if(S.mun!==''&&e.mun!=+S.mun)return false;
-  if(S.at.size||clSet){ // a single activity+classification pair must satisfy both
-    if(!e.p.some(([a,c])=>(!S.at.size||S.at.has(a))&&(!clSet||clSet.has(c))))return false;
-  }
+function matchE(e){
+  if(SE.st.size&&!SE.st.has(e.st))return false;
+  if(SE.novo.size&&!e.novo)return false;
+  if(SE.ct.has('t')&&!e.tel)return false;
+  if(SE.ct.has('m')&&!e.mail)return false;
+  if(SE.uf&&e.uf!==SE.uf)return false;
+  if(SE.mun!==''&&e.mun!=+SE.mun)return false;
+  if(SE.at.size||SE.tipo.size){if(!e.p.some(([a,c])=>(!SE.at.size||SE.at.has(a))&&(!SE.tipo.size||SE.tipo.has(c))))return false}
+  if(SE.com.size&&!e.p.some(([,c])=>SE.com.has(c)))return false;
   return true;
 }
+
+function buildPChips(){
+  const cnt=i=>{const c={};PR.forEach(p=>c[p.r[i]]=(c[p.r[i]]||0)+1);return c};
+  const lbl=k=>i=>PD[k][i]?cap(PD[k][i]):'Não informado';
+  const keys=(k,c,min)=>PD[k].map((_,i)=>i).filter(i=>(c[i]||0)>(min||0)).map(i=>[i,c[i]]).sort((a,b)=>b[1]-a[1]);
+  chips($('pCl'),keys('cl',cnt(3)),SP.cl,lbl('cl'));
+  chips($('pModo'),keys('modo',cnt(9)),SP.modo,lbl('modo'));
+  chips($('pNat'),keys('nat',cnt(7),20),SP.nat,lbl('nat'));
+  chips($('pSit'),keys('sit',cnt(5)).filter(x=>PD.sit[x[0]]),SP.sit,lbl('sit'));
+  chips($('pNovo'),[['n',PR.filter(p=>p.novo).length]],SP.novo,()=>'Novos produtos (60 dias)');
+}
+function initProdutos(pd){
+  PD=pd;
+  PR=pd.p.map(r=>{const er=pd.est[r[0]],e=byReg.get(er);if(e)e.np++;return {r,er,uf:er.slice(0,2),e,novo:!!(r[11]&&r[11]>=NOVO_NUM),s:null}});
+  const s=pd.sit.indexOf('Registrado');if(s>=0)SP.sit.add(s);
+  buildPChips();
+  const cN={};PR.forEach(p=>cN[p.r[2]]=(cN[p.r[2]]||0)+1);
+  pd.nome.map((n,i)=>[i,n]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1])).forEach(([i,n])=>$('pNome').add(new Option(cap(n)+' ('+fmt(cN[i]||0)+')',i)));
+  const gc=new Array(pd.g.length).fill(0);PR.forEach(p=>{const g=p.r[10];for(let i=0;i<g.length;i+=3)gc[g[i]]++});
+  gOrder=pd.g.map((_,i)=>i).filter(i=>pd.g[i]).sort((a,b)=>gc[b]-gc[a]);
+  $('tcP').textContent=fmt(PR.length);
+  if(tab==='E')render();else run();
+}
+function drawG(){
+  const box=$('gconds');box.innerHTML='';
+  SP.g.forEach(c=>{
+    const row=document.createElement('div');row.className='gcond';
+    const sel=document.createElement('select');sel.setAttribute('aria-label','Garantia');
+    sel.add(new Option('Garantia…',''));gOrder.forEach(i=>sel.add(new Option(PD.g[i],i)));sel.value=c.g;
+    const mk=(ph,v)=>{const x=document.createElement('input');x.className='num';x.type='number';x.step='any';x.inputMode='decimal';x.placeholder=ph;x.value=v??'';x.setAttribute('aria-label','Valor '+ph);return x};
+    const mn=mk('mín',c.min),mx=mk('máx',c.max);
+    const rm=document.createElement('button');rm.type='button';rm.textContent='✕';rm.setAttribute('aria-label','Remover garantia');
+    const up=()=>{c.g=sel.value;c.min=mn.value===''?null:+mn.value;c.max=mx.value===''?null:+mx.value;run()};
+    let t;sel.onchange=up;mn.oninput=mx.oninput=()=>{clearTimeout(t);t=setTimeout(up,300)};
+    rm.onclick=()=>{SP.g.splice(SP.g.indexOf(c),1);drawG();run()};
+    row.append(sel,mn,mx,rm);box.appendChild(row)});
+}
+$('addG').onclick=()=>{if(!PD)return;SP.g.push({g:'',min:null,max:null});drawG()};
+
+function pText(p){if(p.s===null){const r=p.r,e=p.e;p.s=norm([p.er+' '+r[1],p.er+'-'+r[1],e?e.rz:'',e?e.nf:'',PD.nome[r[2]],PD.tipo[r[4]],PD.car[r[8]]].join(' '))}return p.s}
+function matchP(p){
+  const r=p.r;
+  if(SP.est&&p.er!==SP.est)return false;
+  if(SP.sit.size&&!SP.sit.has(r[5]))return false;
+  if(SP.cl.size&&!SP.cl.has(r[3]))return false;
+  if(SP.modo.size&&!SP.modo.has(r[9]))return false;
+  if(SP.nat.size&&!SP.nat.has(r[7]))return false;
+  if(SP.novo.size&&!p.novo)return false;
+  if(SP.uf&&p.uf!==SP.uf)return false;
+  if(SP.nome!==''&&r[2]!==+SP.nome)return false;
+  for(const c of SP.g){if(c.g==='')continue;const gi=+c.g,g=r[10];let ok=false;
+    for(let i=0;i<g.length;i+=3){if(g[i]!==gi)continue;const v=g[i+1];
+      if(typeof v==='number'){if((c.min==null||v>=c.min)&&(c.max==null||v<=c.max)){ok=true;break}}
+      else if(c.min==null&&c.max==null){ok=true;break}}
+    if(!ok)return false}
+  return true;
+}
+
+let tq;$('q').oninput=e=>{clearTimeout(tq);tq=setTimeout(()=>{(tab==='P'?SP:SE).q=e.target.value;run()},200)};
+const words=q=>norm(q.trim()).split(/\s+/).filter(Boolean);
 function run(){
-  const q=norm(S.q.trim()),qd=S.q.replace(/\D/g,'');
-  const words=q.split(/\s+/).filter(Boolean);
-  const cl=[...S.tipo,...S.com];const clSet=cl.length?new Set(cl):null;
-  // tipo and comercialização both narrow: require one pair from each when both set
-  res=E.filter(e=>{
-    if(!match(e,S.tipo.size&&!S.com.size?S.tipo:S.com.size&&!S.tipo.size?S.com:null))return false;
-    if(S.tipo.size&&S.com.size){if(!e.p.some(([a,c])=>S.tipo.has(c)&&(!S.at.size||S.at.has(a))))return false;if(!e.p.some(([,c])=>S.com.has(c)))return false}
-    if(words.length&&!words.every(w=>e.s.includes(w))&&!(qd.length>=3&&e.cd.includes(qd)))return false;
-    return true});
-  res.sort((a,b)=>(!a.rz-!b.rz)||a.rz.localeCompare(b.rz,'pt-BR'));
-  shown=50;render();
-  const n=S.novo.size+S.tipo.size+S.com.size+S.at.size+(S.uf?1:0)+(S.mun!==''?1:0)+(S.st.size===1&&S.st.has('A')?0:1);
+  shown=40;
+  if(tab==='P'){
+    if(!PD){render();return}
+    const w=words(SP.q);
+    res=PR.filter(p=>matchP(p)&&(!w.length||w.every(x=>pText(p).includes(x))));
+  }else{
+    const w=words(SE.q),qd=SE.q.replace(/\D/g,'');
+    res=E.filter(e=>matchE(e)&&(!w.length||w.every(x=>e.s.includes(x))||(qd.length>=3&&e.cd.includes(qd))));
+    res.sort((a,b)=>(!a.rz-!b.rz)||a.rz.localeCompare(b.rz,'pt-BR'));
+  }
+  render();
+  const n=tab==='P'?SP.cl.size+SP.modo.size+SP.nat.size+SP.novo.size+(SP.uf?1:0)+(SP.nome!==''?1:0)+SP.g.filter(c=>c.g!=='').length+(SP.est?1:0):
+    SE.novo.size+SE.ct.size+SE.tipo.size+SE.com.size+SE.at.size+(SE.uf?1:0)+(SE.mun!==''?1:0)+(SE.st.size===1&&SE.st.has('A')?0:1);
   $('nf').textContent=n?'('+n+')':'';
-  try{localStorage.setItem('sipeagro-f',JSON.stringify({tipo:[...S.tipo],com:[...S.com],at:[...S.at],st:[...S.st],uf:S.uf}))}catch(_){}
 }
 function bars(){
-  const c=new Array(D.cl.length).fill(0);
-  res.forEach(e=>new Set(e.p.map(p=>p[1])).forEach(i=>c[i]++));
-  const top=[...tipoIdx].map(i=>[i,c[i]]).sort((a,b)=>b[1]-a[1]);
-  const max=Math.max(1,...top.map(x=>x[1]));
-  $('bars').innerHTML=top.map(([i,n])=>`<button class="bar" type="button" data-i="${i}" title="Filtrar por ${cap(D.cl[i])}"><span>${cap(D.cl[i])}</span><span>${n.toLocaleString('pt-BR')}</span><i><b style="width:${n/max*100}%"></b></i></button>`).join('');
-  $('bars').querySelectorAll('.bar').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;S.tipo.clear();S.tipo.add(i);syncChips();run()});
+  const el=$('bars');let top,label,click;
+  if(tab==='P'){
+    const c={};res.forEach(p=>c[p.r[3]]=(c[p.r[3]]||0)+1);
+    top=Object.keys(c).map(i=>[+i,c[i]]).sort((a,b)=>b[1]-a[1]);
+    label=i=>PD.cl[i]?cap(PD.cl[i]):'Não informado';
+    click=i=>{SP.cl.clear();SP.cl.add(i);buildPChips();run()};
+  }else{
+    const c=new Array(D.cl.length).fill(0);res.forEach(e=>new Set(e.p.map(p=>p[1])).forEach(i=>c[i]++));
+    top=[...tipoIdx].map(i=>[i,c[i]]).sort((a,b)=>b[1]-a[1]);
+    label=i=>cap(D.cl[i]);
+    click=i=>{SE.tipo.clear();SE.tipo.add(i);buildEChips();run()};
+  }
+  const max=Math.max(1,...top.map(x=>x[1]));el.hidden=!top.length;
+  el.innerHTML=top.map(([i,n])=>`<button class="bar" type="button" data-i="${i}"><span>${esc(label(i))}</span><span>${fmt(n)}</span><i><b style="width:${n/max*100}%"></b></i></button>`).join('');
+  el.querySelectorAll('.bar').forEach(b=>b.onclick=()=>click(+b.dataset.i));
 }
-function syncChips(){[['fTipo',S.tipo],['fCom',S.com],['fAt',S.at],['fSt',S.st]].forEach(([id,set])=>{
-  const el=$(id);const items=el.querySelectorAll('.chip');items.forEach(b=>b.setAttribute('aria-pressed','false'))});
-  rebuild();}
-function rebuild(){
-  chips($('fTipo'),byCnt([...tipoIdx],cntCl),S.tipo,i=>cap(D.cl[i]));
-  chips($('fCom'),byCnt(comIdx,cntCl),S.com,i=>cap(D.cl[i].replace(/^PRODUTOS? /,'')));
-  chips($('fAt'),byCnt(D.at.map((_,i)=>i),cntAt),S.at,i=>cap(D.at[i]));
-  chips($('fSt'),Object.keys(ST).map(k=>[k,cntSt[k]||0]),S.st,k=>ST[k]);
-}
-const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const gq=e=>'https://www.google.com/search?q='+encodeURIComponent('"'+(e.rz||e.nf)+'" '+D.mun[e.mun]+' '+e.uf+' telefone contato');
-function card(e){
+function contactHtml(e){
+  const parts=[];
+  if(e.tel)e.tel.split(' / ').slice(0,3).forEach(t=>parts.push(`<a href="tel:${esc(t.replace(/[^\d+]/g,''))}">☎ ${esc(t)}</a>`));
+  if(e.mail)e.mail.split(' / ').slice(0,3).forEach(m=>parts.push(`<a href="mailto:${esc(m)}">✉ ${esc(m)}</a>`));
+  if(!parts.length)parts.push(`<a href="${gq(e)}" target="_blank" rel="noopener">Buscar contato na internet ↗</a>`);
+  return `<div class="contact">${parts.join('')}</div>`;
+}
+function cardE(e){
   const acts=e.p.map(([a,c])=>`<span class="act"><em>${esc(D.at[a])}</em>${esc(cap(D.cl[c]))}</span>`).join('');
-  return `<article class="card"><div class="h"><div><h2><a href="${gq(e)}" target="_blank" rel="noopener" title="Buscar contato da empresa">${esc(e.rz||e.nf||'Razão social não informada')}</a></h2>${e.nf&&e.nf!==e.rz?`<div class="nf">${esc(e.nf)}</div>`:''}</div><span>${e.novo?'<span class="pill N">Novo</span>':''}<span class="pill ${e.st}">${ST[e.st]||e.st}</span></span></div>
-  <div class="meta"><span>${esc(D.mun[e.mun])} – ${e.uf}</span><span>Registro <b>${esc(e.reg)}</b></span><span>CNPJ <b>${esc(e.cnpj)}</b></span></div>
-  <div class="acts">${acts}</div><a class="ctt" href="${gq(e)}" target="_blank" rel="noopener">Buscar telefone e site da empresa ↗</a></article>`;
+  return `<article class="card"><div class="h"><div><h2>${esc(e.rz||e.nf||'Razão social não informada')}</h2>${e.nf&&e.nf!==e.rz?`<div class="nf">${esc(e.nf)}</div>`:''}</div><span class="pills">${e.novo?'<span class="pill N">Novo</span>':''}<span class="pill ${e.st}">${ST[e.st]||e.st}</span></span></div>
+  <div class="meta"><span>${esc(D.mun[e.mun])} – ${e.uf}</span><span>Registro <b>${esc(e.reg)}</b></span><span>CNPJ <b>${esc(e.cnpj)}</b></span>${e.end?`<span>${esc(e.end.trim())}</span>`:''}</div>
+  <div class="acts">${acts}</div>
+  ${e.np?`<div class="empresa"><button type="button" data-est="${esc(e.reg)}">Ver ${fmt(e.np)} produto${e.np>1?'s':''} registrado${e.np>1?'s':''} →</button></div>`:''}
+  ${contactHtml(e)}</article>`;
+}
+const fv=v=>typeof v==='number'?v.toLocaleString('pt-BR',{maximumFractionDigits:4}):esc(v);
+function cardP(p){
+  const r=p.r,e=p.e,g=r[10],hits=new Set(SP.g.filter(c=>c.g!=='').map(c=>+c.g));
+  let gh='';for(let i=0;i<g.length;i+=3){const u=PD.u[g[i+2]];gh+=`<div class="${hits.has(g[i])?'hit':''}"><span>${esc(PD.g[g[i]])}</span><b>${fv(g[i+1])}${u&&u!=='N/A'?' '+esc(u):''}</b></div>`}
+  const sit=PD.sit[r[5]]||'';
+  return `<article class="card"><div class="h"><div><h2>${esc(cap(PD.nome[r[2]]||'Produto'))}</h2><div class="nf">${esc(cap(PD.tipo[r[4]]))}</div></div><span class="pills">${p.novo?'<span class="pill N">Novo</span>':''}${sit?`<span class="pill ${esc(sit)}">${esc(sit)}</span>`:''}</span></div>
+  <div class="meta"><span>Registro <b>${esc(p.er)}-${esc(r[1])}</b></span>${r[6]?`<span>Concedido em ${esc(r[6])}</span>`:''}${PD.modo[r[9]]?`<span>${esc(cap(PD.modo[r[9]]))}</span>`:''}${PD.nat[r[7]]?`<span>${esc(cap(PD.nat[r[7]]))}</span>`:''}</div>
+  <div class="gar">${gh||'<div><span>Sem garantias informadas</span></div>'}</div>
+  <div class="empresa">${e?`<button type="button" data-emp="${esc(p.er)}">${esc(e.rz||e.nf)}</button> · ${esc(D.mun[e.mun])} – ${e.uf}`:`Empresa ${esc(p.er)}`}</div>
+  ${e?contactHtml(e):''}</article>`;
 }
 function render(){
-  $('count').innerHTML=res.length.toLocaleString('pt-BR')+'<small>'+(res.length===1?'empresa encontrada':'empresas encontradas')+'</small>';
+  const act=$('active');
+  act.innerHTML=tab==='P'&&SP.est?`<button type="button">Empresa: ${esc((byReg.get(SP.est)||{}).rz||SP.est)} ✕</button>`:'';
+  if(act.firstChild)act.firstChild.onclick=()=>{SP.est='';run()};
+  if(tab==='P'&&!PD){$('count').textContent='…';$('bars').hidden=true;$('list').innerHTML='<div class="empty">Carregando 130 mil produtos…</div>';$('more').hidden=true;return}
+  const lbl=tab==='P'?['produto encontrado','produtos encontrados']:['empresa encontrada','empresas encontradas'];
+  $('count').innerHTML=fmt(res.length)+'<small>'+(res.length===1?lbl[0]:lbl[1])+'</small>';
   bars();
-  $('list').innerHTML=res.length?res.slice(0,shown).map(card).join(''):'<div class="empty">Nenhuma empresa com esses filtros. Tente remover algum filtro ou mudar a busca.</div>';
+  const card=tab==='P'?cardP:cardE;
+  $('list').innerHTML=res.length?res.slice(0,shown).map(card).join(''):'<div class="empty">Nada encontrado com esses filtros. Tente remover algum filtro ou mudar a busca.</div>';
   $('more').hidden=res.length<=shown;
-  $('more').textContent='Mostrar mais ('+(res.length-shown).toLocaleString('pt-BR')+' restantes)';
+  $('more').textContent='Mostrar mais ('+fmt(res.length-shown)+' restantes)';
+  $('list').querySelectorAll('[data-est]').forEach(b=>b.onclick=()=>{SP.est=b.dataset.est;SP.sit.clear();if(PD)buildPChips();setTab('P')});
+  $('list').querySelectorAll('[data-emp]').forEach(b=>b.onclick=()=>{SE.q=b.dataset.emp;SE.st.clear();buildEChips();setTab('E')});
 }
-$('more').onclick=()=>{shown+=50;render()};
-$('reset').onclick=()=>{S.novo.clear();chips($('fNovo'),[['n',E.filter(e=>e.novo).length]],S.novo,()=>'Novos registros (60 dias)');S.tipo.clear();S.com.clear();S.at.clear();S.st=new Set(['A']);S.uf='';S.mun='';$('fUf').value='';fillMun();rebuild();run()};
+$('more').onclick=()=>{shown+=40;render()};
+function setTab(t){
+  tab=t;$('tabP').setAttribute('aria-selected',t==='P');$('tabE').setAttribute('aria-selected',t==='E');
+  $('fsP').hidden=t!=='P';$('fsE').hidden=t!=='E';
+  $('q').value=(t==='P'?SP:SE).q;
+  $('q').placeholder=t==='P'?'Buscar produto, registro ou empresa':'Buscar empresa, CNPJ, registro ou município';
+  run();window.scrollTo(0,0);
+}
+$('tabP').onclick=()=>setTab('P');$('tabE').onclick=()=>setTab('E');
+$('reset').onclick=()=>{
+  if(tab==='P'){SP.cl.clear();SP.modo.clear();SP.nat.clear();SP.novo.clear();SP.uf='';SP.nome='';SP.est='';SP.g=[];$('pUf').value='';$('pNome').value='';
+    if(PD){drawG();SP.sit.clear();const s=PD.sit.indexOf('Registrado');if(s>=0)SP.sit.add(s);buildPChips()}}
+  else{SE.novo.clear();SE.ct.clear();SE.tipo.clear();SE.com.clear();SE.at.clear();SE.st=new Set(['A']);SE.uf='';SE.mun='';$('fUf').value='';fillMun();buildEChips()}
+  run()};
 const asideEl=$('filters');
 $('btnFilt').onclick=()=>asideEl.classList.add('open');
 $('close').onclick=$('apply').onclick=()=>{asideEl.classList.remove('open');window.scrollTo(0,0)};
-
-try{const s=JSON.parse(localStorage.getItem('sipeagro-f')||'null');if(s){S.tipo=new Set(s.tipo);S.com=new Set(s.com);S.at=new Set(s.at);S.st=new Set(s.st);S.uf=s.uf||'';$('fUf').value=S.uf;fillMun();rebuild()}}catch(_){}
-run();
+$('dt').textContent=D.atualizado;$('tcE').textContent=fmt(E.length);
+setTab('P');
+fetch('produtos.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(initProdutos)
+  .catch(()=>{$('list').innerHTML='<div class="empty">Não foi possível carregar os produtos. Verifique a conexão e recarregue a página.</div>'});
 })();
 </script>

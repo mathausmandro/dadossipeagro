@@ -11,6 +11,7 @@ done
 rm -f "$MARK"
 [[ -z "$F" ]] && { echo "ERRO: download não chegou em ~/Downloads"; exit 1; }
 sleep 2; mv "$F" "$BASE/dados/sipeagrofertilizante.csv"
+python3 -I "$BASE/tools/baixar_qlik.py" "$BASE" || echo "AVISO: produtos não atualizados hoje (usando a última versão)"
 python3 -I "$BASE/tools/build.py" "$BASE"
 
 # Publica no GitHub Pages se houver mudança
