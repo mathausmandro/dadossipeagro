@@ -7,6 +7,7 @@ BASE = sys.argv[1]
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 URL = 'https://mapa-indicadores.agricultura.gov.br/publico/extensions/Fertilizantes/Fertilizantes.html'
 PORT = 9333
+CSV = 'https://dados.agricultura.gov.br/dataset/52a01565-72d6-410e-b21b-64035831a7be/resource/e0bbc9d5-f161-448b-a6d4-c7beb312ec33/download/sipeagrofertilizante.csv'
 PERFIL = os.path.join(BASE, 'dados', 'chrome-perfil')
 SAIDA = os.path.join(BASE, 'dados', 'qlik.json')
 
@@ -81,6 +82,17 @@ def main():
                 time.sleep(0.5)
         ws = WS(page['webSocketDebuggerUrl'])
         ws.call('Page.enable')
+        # 1) CSV de empresas (portal de dados abertos), baixado pelo próprio Chrome
+        ws.call('Page.navigate', {'url': 'https://dados.agricultura.gov.br/dataset/sipeagro'})
+        time.sleep(8)
+        r = ws.call('Runtime.evaluate', {'expression': f"fetch('{CSV}').then(r => r.ok ? r.text() : '')", 'awaitPromise': True, 'returnByValue': True, 'timeout': 120000})
+        csv_txt = r.get('result', {}).get('result', {}).get('value') or ''
+        if csv_txt.count('\n') > 5000:
+            open(os.path.join(BASE, 'dados', 'sipeagrofertilizante.csv'), 'w', encoding='utf-8', newline='').write(csv_txt)
+            print(f"CSV empresas: {csv_txt.count(chr(10))} linhas")
+        else:
+            print('AVISO: CSV de empresas não baixado; usando a última versão')
+        # 2) Painel Qlik (produtos, garantias, contatos)
         ws.call('Page.navigate', {'url': URL})
         time.sleep(20)
         r = ws.call('Runtime.evaluate', {'expression': js, 'awaitPromise': True, 'returnByValue': True, 'timeout': 600000})
